@@ -4,6 +4,9 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const { testConnection } = require('./config/database');
 
+// Importar rotas
+const authRoutes = require('./routes/auth');
+
 const app = express();
 
 // Testar conexão com banco na inicialização
@@ -14,13 +17,25 @@ app.use(helmet());
 app.use(cors());
 app.use(morgan('combined'));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Rotas da API
+app.use('/api/auth', authRoutes);
 
 // Rota principal
 app.get('/', (req, res) => {
   res.json({
     message: 'Photo CRM API funcionando!',
     status: 'OK',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      auth: {
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login',
+        profile: 'GET /api/auth/profile',
+        verify: 'GET /api/auth/verify'
+      }
+    }
   });
 });
 
@@ -45,6 +60,25 @@ app.get('/health', async (req, res) => {
       timestamp: new Date().toISOString()
     });
   }
+});
+
+// Middleware para rotas não encontradas
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Rota não encontrada',
+    path: req.originalUrl
+  });
+});
+
+// Middleware para tratamento de erros
+app.use((error, req, res, next) => {
+  console.error('Erro:', error);
+  res.status(500).json({
+    success: false,
+    message: 'Erro interno do servidor',
+    error: process.env.NODE_ENV === 'development' ? error.message : 'Algo deu errado'
+  });
 });
 
 module.exports = app;
