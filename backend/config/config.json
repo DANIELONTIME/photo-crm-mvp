@@ -7,5 +7,25 @@
     "port": 5432,
     "dialect": "postgres",
     "logging": true
+  },
+  "test": {
+    "username": "photo_user",
+    "password": "dev123456",
+    "database": "photo_crm_mvp_test",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "dialect": "postgres",
+    "logging": false
+  },
+  "production": {
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    },
+    "logging": false
   }
 }
