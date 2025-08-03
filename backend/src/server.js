@@ -11,3 +11,8 @@ app.listen(PORT, HOST, () => {
   console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
   console.log('🚀 ================================');
 });
+// Importar rotas de clientes (adicione após outras importações)
+const clientRoutes = require('../routes/clients');
+
+// Usar rotas de clientes (adicione após outras rotas)
+app.use('/api/clients', clientRoutes);
