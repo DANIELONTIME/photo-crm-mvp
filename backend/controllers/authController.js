@@ -1,5 +1,5 @@
-const { User } = require('../../models');
-const { generateToken } = require('../utils/jwt');
+const { User } = require('../models');
+const { generateToken } = require('../src/utils/jwt');
 
 class AuthController {
   // Registro de usuário
@@ -45,6 +45,7 @@ class AuthController {
     }
   }
 
+  // Login de usuário
   async login(req, res) {
     try {
       const { email, password } = req.body;
@@ -67,7 +68,7 @@ class AuthController {
         });
       }
 
-      const isValidPassword = await user.checkPassword(password);
+      const isValidPassword = await user.validatePassword(password);
       if (!isValidPassword) {
         return res.status(401).json({
           success: false,
@@ -92,6 +93,7 @@ class AuthController {
     }
   }
 
+  // Perfil do usuário autenticado
   async profile(req, res) {
     try {
       res.json({

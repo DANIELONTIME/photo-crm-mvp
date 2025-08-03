@@ -5,7 +5,9 @@ const morgan = require('morgan');
 const { testConnection } = require('./config/database');
 
 // Importar rotas
-const authRoutes = require('./routes/auth');
+const authRoutes = require('../routes/auth');
+const clientRoutes = require('../routes/clients');
+const eventRoutes = require('../routes/events');
 
 const app = express();
 
@@ -21,6 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rotas da API
 app.use('/api/auth', authRoutes);
+app.use('/api/clients', clientRoutes);
+app.use('/api/events', eventRoutes);
 
 // Rota principal
 app.get('/', (req, res) => {
@@ -34,6 +38,19 @@ app.get('/', (req, res) => {
         login: 'POST /api/auth/login',
         profile: 'GET /api/auth/profile',
         verify: 'GET /api/auth/verify'
+      },
+      clients: {
+        list: 'GET /api/clients',
+        create: 'POST /api/clients',
+        update: 'PUT /api/clients/:id',
+        delete: 'DELETE /api/clients/:id'
+      },
+      events: {
+        list: 'GET /api/events',
+        create: 'POST /api/events',
+        update: 'PUT /api/events/:id',
+        delete: 'DELETE /api/events/:id',
+        stats: 'GET /api/events/stats'
       }
     }
   });

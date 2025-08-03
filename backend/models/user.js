@@ -1,93 +1,77 @@
-'use strict';
-const { Model } = require('sequelize');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../src/config/database');
 const bcrypt = require('bcrypt');
 
-module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
-    static associate(models) {
-      // Associações serão adicionadas depois
-      // User.hasMany(models.Client, { foreignKey: 'userId' });
-      // User.hasMany(models.Event, { foreignKey: 'userId' });
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: {
+        msg: 'Nome é obrigatório'
+      },
+      len: {
+        args: [2, 100],
+        msg: 'Nome deve ter entre 2 e 100 caracteres'
+      }
     }
-
-    // Método para verificar senha
-    async checkPassword(password) {
-      return bcrypt.compare(password, this.password);
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: {
+        msg: 'Email deve ter formato válido'
+      }
     }
-
-    // Método para retornar dados seguros (sem senha)
-    toSafeObject() {
-      return {
-        id: this.id,
-        name: this.name,
-        email: this.email,
-        createdAt: this.createdAt,
-        updatedAt: this.updatedAt
-      };
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      len: {
+        args: [6, 255],
+        msg: 'Senha deve ter pelo menos 6 caracteres'
+      }
     }
   }
-  
-  User.init({
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: {
-          msg: 'Nome é obrigatório'
-        },
-        len: {
-          args: [2, 100],
-          msg: 'Nome deve ter entre 2 e 100 caracteres'
-        }
+}, {
+  tableName: 'users',
+  timestamps: true,
+  hooks: {
+    beforeCreate: async (user) => {
+      if (user.password) {
+        user.password = await bcrypt.hash(user.password, 10);
       }
     },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: {
-        msg: 'Este email já está cadastrado'
-      },
-      validate: {
-        isEmail: {
-          msg: 'Email deve ter formato válido'
-        },
-        notEmpty: {
-          msg: 'Email é obrigatório'
-        }
-      }
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        len: {
-          args: [6, 100],
-          msg: 'Senha deve ter pelo menos 6 caracteres'
-        },
-        notEmpty: {
-          msg: 'Senha é obrigatória'
-        }
+    beforeUpdate: async (user) => {
+      if (user.changed('password')) {
+        user.password = await bcrypt.hash(user.password, 10);
       }
     }
-  }, {
-    sequelize,
-    modelName: 'User',
-    tableName: 'Users',
-    hooks: {
-      // Criptografar senha antes de criar usuário
-      beforeCreate: async (user) => {
-        if (user.password) {
-          user.password = await bcrypt.hash(user.password, 12);
-        }
-      },
-      // Criptografar senha antes de atualizar usuário
-      beforeUpdate: async (user) => {
-        if (user.changed('password')) {
-          user.password = await bcrypt.hash(user.password, 12);
-        }
-      }
-    }
-  });
-  
-  return User;
+  }
+});
+
+// Método para verificar senha
+User.prototype.checkPassword = async function(password) {
+  return await bcrypt.compare(password, this.password);
 };
+
+// Método para retornar dados seguros (sem senha)
+User.prototype.toSafeObject = function() {
+  return {
+    id: this.id,
+    name: this.name,
+    email: this.email,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt
+  };
+};
+
+module.exports = User;
