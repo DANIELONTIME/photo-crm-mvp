@@ -2,9 +2,8 @@ require("dotenv").config();
 const app = require("./app");
 
 // 🛠️ Rotas
-const authRoutes = require('../routes/auth');
-const clientRoutes = require('../routes/clients');
-const eventRoutes = require('../routes/events');
+const clientRoutes = require("../routes/clients");
+const authRoutes = require("../routes/auth");
 
 // 🧠 Use as rotas ANTES de iniciar o servidor
 app.use("/api/clients", clientRoutes);
